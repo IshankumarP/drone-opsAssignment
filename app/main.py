@@ -49,6 +49,11 @@ def handle_intent(intent: str, data: dict) -> dict:
             "count": len(available),
             "message": f"{len(available)} drones are currently available."
         }
+    if pilots.empty:
+        return {
+            "intent": intent,
+            "message": "No pilot data available from the roster."
+        }
 
     return {
         "intent": intent,
