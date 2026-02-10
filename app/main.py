@@ -38,3 +38,9 @@ def chat(req: ChatRequest):
 @app.get("/")
 def root():
     return {"message": "Drone Ops AI is running"}
+
+@app.get("/chat")
+def chat_info():
+    return {
+        "info": "POST a JSON body like { 'message': '...' } to this endpoint"
+    }
