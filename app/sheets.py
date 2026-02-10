@@ -36,6 +36,7 @@ def to_dataframe(rows):
 
     return pd.DataFrame(data, columns=headers)
 
+
 def load_all_data():
     service = get_service()
 
@@ -43,12 +44,12 @@ def load_all_data():
     drones_raw = read_sheet(service, DRONE_SHEET_ID, "Drone_fleet!A1:G")
     missions_raw = read_sheet(service, MISSION_SHEET_ID, "Missions!A1:H")
 
-    pilots_df = to_dataframe(pilots_raw)
-    drones_df = to_dataframe(drones_raw)
-    missions_df = to_dataframe(missions_raw)
+    pilots = pd.DataFrame(pilots_raw[1:], columns=pilots_raw[0])
+    drones = pd.DataFrame(drones_raw[1:], columns=drones_raw[0])
+    missions = pd.DataFrame(missions_raw[1:], columns=missions_raw[0])
 
     return {
-        "pilots": pilots_df,
-        "drones": drones_df,
-        "missions": missions_df
+        "pilots": pilots,
+        "drones": drones,
+        "missions": missions
     }
