@@ -34,3 +34,7 @@ def chat(req: ChatRequest):
     # LLM explanation layer (safe fallback)
     response = llm_response(req.message, result)
     return {"reply": response}
+
+@app.get("/")
+def root():
+    return {"message": "Drone Ops AI is running"}
