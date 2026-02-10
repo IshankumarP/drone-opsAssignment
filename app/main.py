@@ -136,6 +136,25 @@ def handle_intent(intent: str, data: dict) -> dict:
             "message": "No pilot data available from the roster."
         }
 
+    if intent == "UPDATE_PILOT_STATUS":
+        # very simple parse for now
+        parts = req.message.lower().split()
+        pilot_id = parts[-3]
+        new_status = parts[-1].capitalize()
+
+        success = update_pilot_status(pilot_id, new_status)
+
+        if success:
+            return {
+                "intent": intent,
+                "message": f"Pilot {pilot_id} status updated to {new_status}."
+            }
+
+        return {
+            "intent": intent,
+            "message": f"Pilot {pilot_id} not found."
+        }
+
     return {
         "intent": intent,
         "message": f"Intent detected: {intent}"

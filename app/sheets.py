@@ -5,6 +5,10 @@ from google.oauth2.service_account import Credentials
 from googleapiclient.discovery import build
 
 SCOPES = ["https://www.googleapis.com/auth/spreadsheets.readonly"]
+SCOPES = [
+    "https://www.googleapis.com/auth/spreadsheets"
+]
+
 
 def get_service():
     creds_json = json.loads(os.getenv("GOOGLE_SHEETS_CREDENTIALS_JSON"))
@@ -53,3 +57,29 @@ def load_all_data():
         "drones": drones,
         "missions": missions
     }
+
+def update_pilot_status(pilot_id: str, new_status: str):
+    service = get_service()
+
+    sheet = service.spreadsheets().values().get(
+        spreadsheetId=PILOT_SHEET_ID,
+        range="Pilot_roster!A2:H"
+    ).execute()
+
+    rows = sheet.get("values", [])
+
+    for idx, row in enumerate(rows):
+        if row[0] == pilot_id:
+            row_index = idx + 2  # sheet row number
+
+            service.spreadsheets().values().update(
+                spreadsheetId=PILOT_SHEET_ID,
+                range=f"Pilot_roster!F{row_index}",
+                valueInputOption="RAW",
+                body={"values": [[new_status]]}
+            ).execute()
+
+            return True
+
+    return False
+
