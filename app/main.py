@@ -16,6 +16,33 @@ class ChatRequest(BaseModel):
 def health():
     return {"status": "ok"}
 
+def handle_intent(intent: str, data: dict) -> dict:
+    """
+    Deterministic core logic.
+    """
+    if intent == "QUERY_PILOTS":
+        pilots = data["pilots"]
+        available = pilots[pilots["status"].str.lower() == "available"]
+        return {
+            "intent": intent,
+            "count": len(available),
+            "message": f"{len(available)} pilots are currently available."
+        }
+
+    if intent == "QUERY_DRONES":
+        drones = data["drones"]
+        available = drones[drones["status"].str.lower() == "available"]
+        return {
+            "intent": intent,
+            "count": len(available),
+            "message": f"{len(available)} drones are currently available."
+        }
+
+    return {
+        "intent": intent,
+        "message": f"Intent detected: {intent}"
+    }
+
 @app.post("/chat")
 def chat(req: ChatRequest):
     """
@@ -25,15 +52,14 @@ def chat(req: ChatRequest):
     data = load_all_data()
     intent = route_intent(req.message)
 
-    # Placeholder result (will expand)
-    result = {
-        "intent": intent,
-        "message": f"Intent detected: {intent}"
-    }
+    # Deterministic result
+    result = handle_intent(intent, data)
 
-    # LLM explanation layer (safe fallback)
+    # LLM explanation layer
     response = llm_response(req.message, result)
+
     return {"reply": response}
+
 
 @app.get("/")
 def root():

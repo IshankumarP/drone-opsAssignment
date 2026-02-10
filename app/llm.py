@@ -1,34 +1,39 @@
 import os
-import openai
+from openai import OpenAI
 
-OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
-def llm_response(user_message: str, system_result: dict) -> str:
+def llm_response(user_message: str, result: dict) -> str:
     """
-    Uses OpenAI for natural explanation.
-    Falls back to deterministic response if unavailable.
+    LLM layer that explains deterministic results.
+    Never makes decisions.
     """
-    if not OPENAI_API_KEY:
-        return fallback_response(system_result)
+    system_prompt = """
+You are a Drone Operations Coordinator AI.
+Explain results clearly and concisely.
+Do NOT invent data.
+Use the provided result only.
+"""
+
+    prompt = f"""
+User asked: {user_message}
+
+System result:
+{result}
+
+Explain this to the user in a helpful, operational tone.
+"""
 
     try:
-        openai.api_key = OPENAI_API_KEY
-
-        completion = openai.ChatCompletion.create(
+        completion = client.chat.completions.create(
             model="gpt-4o-mini",
             messages=[
-                {"role": "system", "content": "You are a drone operations coordinator assistant."},
-                {"role": "user", "content": user_message},
-                {"role": "assistant", "content": str(system_result)}
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": prompt},
             ],
-            max_tokens=150
+            temperature=0.2,
         )
-
-        return completion.choices[0].message["content"]
-
+        return completion.choices[0].message.content
     except Exception:
-        return fallback_response(system_result)
-
-
-def fallback_response(system_result: dict) -> str:
-    return f"[Fallback mode]\n{system_result.get('message', 'Request processed.')}"
+        # Hard safety fallback
+        return result.get("message", "Unable to generate response.")
