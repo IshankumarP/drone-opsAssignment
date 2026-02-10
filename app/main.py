@@ -22,7 +22,13 @@ def handle_intent(intent: str, data: dict) -> dict:
     """
     if intent == "QUERY_PILOTS":
         pilots = data["pilots"]
-        available = pilots[pilots["status"].str.lower() == "available"]
+        available = pilots[
+            pilots["status"]
+            .fillna("")
+            .astype(str)
+            .str.lower() == "available"
+        ]
+
         return {
             "intent": intent,
             "count": len(available),
@@ -31,7 +37,13 @@ def handle_intent(intent: str, data: dict) -> dict:
 
     if intent == "QUERY_DRONES":
         drones = data["drones"]
-        available = drones[drones["status"].str.lower() == "available"]
+        available = drones[
+            drones["status"]
+            .fillna("")
+            .astype(str)
+            .str.lower() == "available"
+        ]
+
         return {
             "intent": intent,
             "count": len(available),
